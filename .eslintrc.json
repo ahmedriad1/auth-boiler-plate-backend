@@ -9,6 +9,14 @@
     "ecmaVersion": 11
   },
   "rules": {
-    "arrow-parens": "off"
+    "arrow-parens": "off",
+    "func-names": "off",
+    "no-unused-vars": ["error", { "argsIgnorePattern": "req|res|next|val" }],
+    "no-underscore-dangle": "off",
+    "prefer-destructuring": ["error", { "object": true, "array": false }],
+    "consistent-return": "off",
+    "operator-linebreak": "off",
+    "camelcase": "off",
+    "no-param-reassign": "off"
   }
 }
