@@ -1,5 +1,8 @@
 /* eslint-disable no-console */
 require('dotenv').config();
+
+if (process.argv.includes('--prod')) process.env.NODE_ENV = 'production';
+
 const configDB = require('./config/db');
 
 // Handle uncaught exception

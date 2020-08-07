@@ -3,7 +3,7 @@
 const ValidationError = require('mongoose').Error.ValidationError;
 const AppError = require('./AppError');
 
-const sendProductionError = (err, res, req) => {
+const sendProductionError = (err, req, res) => {
   res.status(err.statusCode || 500);
   const message = err.isOperational ? err.message : 'Something went wrong !';
   if (!err.isOperational) console.error(`Error: ${err}`);
@@ -37,7 +37,7 @@ const handleJwtError = () => new AppError('Invalid token !', 401);
 module.exports = (err, req, res, next) => {
   const isDev = process.env.NODE_ENV === 'development';
   res.status(err.statusCode || 500);
-  let error = { ...err };
+  let error = { ...err, message: err.message };
   if (isDev) return sendDevelopmentError(err, res, req);
   if (error.kind === 'ObjectId') error = handleCastError(error);
   else if (error.code === 11000) error = handleDuplicateKeyError(error);
@@ -45,5 +45,5 @@ module.exports = (err, req, res, next) => {
   else if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError') {
     error = handleJwtError();
   }
-  sendProductionError(error, res, req);
+  sendProductionError(error, req, res);
 };

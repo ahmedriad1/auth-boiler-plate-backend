@@ -1,6 +1,7 @@
 const express = require('express');
 const morgan = require('morgan');
 const helmet = require('helmet');
+const compression = require('compression');
 
 const authRoutes = require('./routes/auth.routes');
 const handler = require('./errors/handler');
@@ -11,6 +12,7 @@ app.use(morgan('dev'));
 app.use(helmet());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+app.use(compression());
 
 app.use('/api/v1/auth', authRoutes);
 
