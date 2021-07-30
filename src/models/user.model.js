@@ -86,4 +86,11 @@ UserSchema.methods.signToken = function () {
   });
 };
 
+// method to sign a jwt refresh token
+UserSchema.methods.signRefreshToken = function () {
+  return jwt.sign({ _id: this._id }, process.env.JWT_REFRESH_TOKEN_SECRET, {
+    expiresIn: process.env.JWT_REFRESH_TOKEN_TTL,
+  });
+};
+
 module.exports = model('Users', UserSchema);

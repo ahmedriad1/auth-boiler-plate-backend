@@ -6,7 +6,7 @@ const AppError = require('./AppError');
 const sendProductionError = (err, req, res) => {
   res.status(err.statusCode || 500);
   const message = err.isOperational ? err.message : 'Something went wrong !';
-  if (!err.isOperational) console.error(`Error: ${err}`);
+  if (!err.isOperational) console.error(`Error: ${JSON.stringify(err)}`);
   res.json({
     message,
   });

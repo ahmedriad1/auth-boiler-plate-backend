@@ -1,14 +1,23 @@
+const jwt = require('jsonwebtoken');
+const { promisify } = require('util');
 const UserModel = require('../models/user.model');
 const AppError = require('../errors/AppError');
 const handleAsync = require('../utils/handleAsync');
 
 // reusable function to send a jwt token
 // eslint-disable-next-line object-curly-newline
-const sendToken = ({ res, user, statusCode = 200, message = null }) => {
+const sendToken = ({
+  res,
+  user,
+  statusCode = 200,
+  message = null,
+  withRefreshToken = true,
+}) => {
   const token = user.signToken();
   if (user.password) user.password = undefined;
   const data = { token, user };
   if (message) data.message = message;
+  if (withRefreshToken) data.refreshToken = user.signRefreshToken();
   return res.status(statusCode).json(data);
 };
 
@@ -64,4 +73,34 @@ exports.updatePassword = handleAsync(async (req, res, next) => {
   user.confirm_password = confirm_password;
   await user.save();
   sendToken({ res, user, message: 'Password updated successfully' });
+});
+
+exports.refresh = handleAsync(async (req, res, next) => {
+  const { refreshToken } = req.body;
+  if (!refreshToken) {
+    return next(new AppError('Please provide a refresh token !', 400));
+  }
+
+  // verify jwt token, and get decoded data
+  const decoded = await promisify(jwt.verify)(
+    refreshToken,
+    process.env.JWT_REFRESH_TOKEN_SECRET,
+  );
+
+  // if token is invalid
+  if (!decoded) return next(new AppError('Invalid refresh token !', 400));
+
+  const user = await UserModel.findById(decoded._id);
+
+  if (!user) {
+    return next(new AppError('Invalid refresh token !', 400));
+  }
+
+  // if user exists create a new access token and no refresh token
+  sendToken({
+    req,
+    res,
+    user,
+    withRefreshToken: false,
+  });
 });
